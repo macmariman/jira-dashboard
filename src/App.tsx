@@ -25,7 +25,15 @@ export function App() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <h1 className="text-xl font-semibold">Jira Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo.svg"
+              alt="JiraJira"
+              className="h-8 w-8 cursor-pointer"
+              onDoubleClick={() => window.open('https://www.youtube.com/watch?v=CdPrhRpQ5KA&list=RDCdPrhRpQ5KA&start_radio=1', '_blank')}
+            />
+            <h1 className="text-xl font-semibold">JiraJira</h1>
+          </div>
           {issues && (
             <Button variant="outline" onClick={handleReset}>
               Cargar otro
