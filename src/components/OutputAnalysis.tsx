@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { JiraIssueWithDates } from '@/types/jira'
 
 interface OutputAnalysisProps {
-  createdIssues: JiraIssueWithDates[]
   closedIssues: JiraIssueWithDates[]
 }
 
@@ -40,21 +39,9 @@ function IssueTable({ issues }: { issues: JiraIssueWithDates[] }) {
   )
 }
 
-export function OutputAnalysis({ createdIssues, closedIssues }: OutputAnalysisProps) {
-  // Deduplicate by key across both files
-  const allMap = new Map<string, JiraIssueWithDates>()
-  for (const issue of createdIssues) {
-    allMap.set(issue.key, issue)
-  }
-  for (const issue of closedIssues) {
-    if (!allMap.has(issue.key)) {
-      allMap.set(issue.key, issue)
-    }
-  }
-
-  const allIssues = [...allMap.values()]
-  const importantes = allIssues.filter((i) => i.label === 'Inactiva')
-  const rest = allIssues.filter((i) => i.label !== 'Inactiva')
+export function OutputAnalysis({ closedIssues }: OutputAnalysisProps) {
+  const importantes = closedIssues.filter((i) => i.label === 'Inactiva')
+  const tareas = closedIssues.filter((i) => i.label === 'Tarea')
 
   return (
     <Card>
@@ -62,7 +49,7 @@ export function OutputAnalysis({ createdIssues, closedIssues }: OutputAnalysisPr
         <CardTitle>
           Análisis de Output
           <span className="ml-2 text-base font-normal text-muted-foreground">
-            ({allIssues.length} tickets)
+            ({closedIssues.length} tickets)
           </span>
         </CardTitle>
       </CardHeader>
@@ -78,10 +65,10 @@ export function OutputAnalysis({ createdIssues, closedIssues }: OutputAnalysisPr
 
         <div className="rounded-lg border border-red-700/50 overflow-hidden">
           <div className="bg-red-700 px-4 py-1.5 text-center text-sm font-semibold text-white">
-            Todo lo demás ({rest.length})
+            Todo lo demás ({tareas.length})
           </div>
           <div className="p-4">
-            <IssueTable issues={rest} />
+            <IssueTable issues={tareas} />
           </div>
         </div>
       </CardContent>

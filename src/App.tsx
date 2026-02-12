@@ -75,7 +75,7 @@ export function App() {
         ) : (
           <div className="space-y-6">
             <TrendLineChart data={prepareLineChartData(createdIssues, closedIssues)} />
-            <OutputAnalysis createdIssues={createdIssues} closedIssues={closedIssues} />
+            <OutputAnalysis closedIssues={closedIssues} />
           </div>
         )}
       </main>
