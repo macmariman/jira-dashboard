@@ -1,4 +1,4 @@
-import type { JiraIssue, StatusCount, SprintInfo } from '@/types/jira'
+import type { JiraIssue, JiraIssueWithDates, DateCount, LineChartData, StatusCount, SprintInfo } from '@/types/jira'
 
 export function parseJiraXml(xmlString: string): JiraIssue[] {
   const parser = new DOMParser()
@@ -29,6 +29,109 @@ export function parseJiraXml(xmlString: string): JiraIssue[] {
   })
 
   return issues
+}
+
+export function parseJiraXmlWithDates(xmlString: string): JiraIssueWithDates[] {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(xmlString, 'text/xml')
+  const items = doc.querySelectorAll('item')
+
+  const issues: JiraIssueWithDates[] = []
+
+  items.forEach((item) => {
+    const key = item.querySelector('key')?.textContent ?? ''
+    const summary = item.querySelector('summary')?.textContent ?? ''
+    const status = item.querySelector('status')?.textContent ?? ''
+    const statusCategoryEl = item.querySelector('statusCategory')
+    const statusCategory = (statusCategoryEl?.getAttribute('key') ?? 'new') as JiraIssue['statusCategory']
+    const assignee = item.querySelector('assignee')?.textContent ?? 'Sin asignar'
+    const type = item.querySelector('type')?.textContent ?? ''
+    const priority = item.querySelector('priority')?.textContent ?? ''
+
+    const createdStr = item.querySelector('created')?.textContent ?? ''
+    const resolvedStr = item.querySelector('resolved')?.textContent ?? ''
+
+    const createdDate = new Date(createdStr)
+
+    const issue: JiraIssueWithDates = {
+      key,
+      summary,
+      status,
+      statusCategory,
+      assignee,
+      type,
+      priority,
+      createdDate,
+    }
+
+    if (resolvedStr) {
+      issue.resolvedDate = new Date(resolvedStr)
+    }
+
+    issues.push(issue)
+  })
+
+  return issues
+}
+
+export function groupByDate(
+  issues: JiraIssueWithDates[],
+  dateField: 'created' | 'resolved'
+): DateCount[] {
+  const dateMap = new Map<string, number>()
+
+  issues.forEach((issue) => {
+    const date = dateField === 'created' ? issue.createdDate : issue.resolvedDate
+    if (!date) return
+
+    const dateKey = date.toISOString().split('T')[0]
+    dateMap.set(dateKey, (dateMap.get(dateKey) ?? 0) + 1)
+  })
+
+  const result: DateCount[] = []
+  dateMap.forEach((count, date) => {
+    result.push({ date, count })
+  })
+
+  return result.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+export function prepareLineChartData(
+  createdIssues: JiraIssueWithDates[],
+  closedIssues: JiraIssueWithDates[]
+): LineChartData[] {
+  const createdByDate = groupByDate(createdIssues, 'created')
+  const closedByDate = groupByDate(closedIssues, 'resolved')
+
+  const createdMap = new Map(createdByDate.map((d) => [d.date, d.count]))
+  const closedMap = new Map(closedByDate.map((d) => [d.date, d.count]))
+
+  const allDates = new Set([...createdMap.keys(), ...closedMap.keys()])
+
+  if (allDates.size === 0) return []
+
+  const sortedDates = [...allDates].sort()
+  const minDate = new Date(sortedDates[0])
+  const maxDate = new Date(sortedDates[sortedDates.length - 1])
+
+  const result: LineChartData[] = []
+  const current = new Date(minDate)
+  let cumulativeCreated = 0
+  let cumulativeClosed = 0
+
+  while (current <= maxDate) {
+    const dateKey = current.toISOString().split('T')[0]
+    cumulativeCreated += createdMap.get(dateKey) ?? 0
+    cumulativeClosed += closedMap.get(dateKey) ?? 0
+    result.push({
+      date: dateKey,
+      created: cumulativeCreated,
+      closed: cumulativeClosed,
+    })
+    current.setDate(current.getDate() + 1)
+  }
+
+  return result
 }
 
 export function groupByStatus(issues: JiraIssue[]): StatusCount[] {

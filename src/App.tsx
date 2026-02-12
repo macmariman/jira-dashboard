@@ -1,24 +1,43 @@
 import { useState } from 'react'
-import { FileDropZone } from '@/components/file-drop-zone'
-import { StatusChart } from '@/components/status-chart'
+import { DualFileDropZone } from '@/components/DualFileDropZone'
+import { TrendLineChart } from '@/components/TrendLineChart'
 import { Button } from '@/components/ui/button'
-import { parseJiraXml, groupByStatus, getSprintInfo } from '@/lib/jira-parser'
-import type { JiraIssue, SprintInfo } from '@/types/jira'
+import { parseJiraXmlWithDates, prepareLineChartData } from '@/lib/jira-parser'
+import type { JiraIssueWithDates, FileStatus } from '@/types/jira'
 
 export function App() {
-  const [issues, setIssues] = useState<JiraIssue[] | null>(null)
-  const [sprintInfo, setSprintInfo] = useState<SprintInfo | null>(null)
+  const [createdIssues, setCreatedIssues] = useState<JiraIssueWithDates[] | null>(null)
+  const [closedIssues, setClosedIssues] = useState<JiraIssueWithDates[] | null>(null)
+  const [createdFileStatus, setCreatedFileStatus] = useState<FileStatus>('empty')
+  const [closedFileStatus, setClosedFileStatus] = useState<FileStatus>('empty')
 
-  const handleFileLoaded = (content: string) => {
-    const parsedIssues = parseJiraXml(content)
-    const info = getSprintInfo(content)
-    setIssues(parsedIssues)
-    setSprintInfo(info)
+  const handleCreatedFileLoaded = (content: string) => {
+    setCreatedFileStatus('loading')
+    try {
+      const parsed = parseJiraXmlWithDates(content)
+      setCreatedIssues(parsed)
+      setCreatedFileStatus('loaded')
+    } catch {
+      setCreatedFileStatus('error')
+    }
+  }
+
+  const handleClosedFileLoaded = (content: string) => {
+    setClosedFileStatus('loading')
+    try {
+      const parsed = parseJiraXmlWithDates(content)
+      setClosedIssues(parsed)
+      setClosedFileStatus('loaded')
+    } catch {
+      setClosedFileStatus('error')
+    }
   }
 
   const handleReset = () => {
-    setIssues(null)
-    setSprintInfo(null)
+    setCreatedIssues(null)
+    setClosedIssues(null)
+    setCreatedFileStatus('empty')
+    setClosedFileStatus('empty')
   }
 
   return (
@@ -34,29 +53,27 @@ export function App() {
             />
             <h1 className="text-xl font-semibold">JiraJira</h1>
           </div>
-          {issues && (
+          {(createdIssues || closedIssues) && (
             <Button variant="outline" onClick={handleReset}>
-              Cargar otro
+              Cargar otros archivos
             </Button>
           )}
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {!issues ? (
-          <div className="mx-auto max-w-md">
-            <FileDropZone onFileLoaded={handleFileLoaded} />
+        {!createdIssues || !closedIssues ? (
+          <div className="mx-auto max-w-4xl">
+            <DualFileDropZone
+              onCreatedFileLoaded={handleCreatedFileLoaded}
+              onClosedFileLoaded={handleClosedFileLoaded}
+              createdFileStatus={createdFileStatus}
+              closedFileStatus={closedFileStatus}
+            />
           </div>
         ) : (
           <div className="space-y-6">
-            {sprintInfo && (
-              <div className="text-muted-foreground">
-                Sprint: <span className="font-medium text-foreground">{sprintInfo.name}</span>
-                {' '}&bull;{' '}
-                {sprintInfo.totalIssues} issues
-              </div>
-            )}
-            <StatusChart data={groupByStatus(issues)} />
+            <TrendLineChart data={prepareLineChartData(createdIssues, closedIssues)} />
           </div>
         )}
       </main>
