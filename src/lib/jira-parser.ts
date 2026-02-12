@@ -50,6 +50,8 @@ export function parseJiraXmlWithDates(xmlString: string): JiraIssueWithDates[] {
 
     const createdStr = item.querySelector('created')?.textContent ?? ''
     const resolvedStr = item.querySelector('resolved')?.textContent ?? ''
+    const label = item.querySelector('labels > label')?.textContent ?? undefined
+    const parent = item.querySelector('parent')?.textContent ?? undefined
 
     const createdDate = new Date(createdStr)
 
@@ -62,6 +64,8 @@ export function parseJiraXmlWithDates(xmlString: string): JiraIssueWithDates[] {
       type,
       priority,
       createdDate,
+      label,
+      parent,
     }
 
     if (resolvedStr) {

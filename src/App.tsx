@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DualFileDropZone } from '@/components/DualFileDropZone'
 import { TrendLineChart } from '@/components/TrendLineChart'
+import { OutputAnalysis } from '@/components/OutputAnalysis'
 import { Button } from '@/components/ui/button'
 import { parseJiraXmlWithDates, prepareLineChartData } from '@/lib/jira-parser'
 import type { JiraIssueWithDates, FileStatus } from '@/types/jira'
@@ -74,6 +75,7 @@ export function App() {
         ) : (
           <div className="space-y-6">
             <TrendLineChart data={prepareLineChartData(createdIssues, closedIssues)} />
+            <OutputAnalysis createdIssues={createdIssues} closedIssues={closedIssues} />
           </div>
         )}
       </main>

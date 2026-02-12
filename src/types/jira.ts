@@ -22,6 +22,8 @@ export interface SprintInfo {
 export interface JiraIssueWithDates extends JiraIssue {
   createdDate: Date
   resolvedDate?: Date
+  label?: string
+  parent?: string
 }
 
 export interface DateCount {
