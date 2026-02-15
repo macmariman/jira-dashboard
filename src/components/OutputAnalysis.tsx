@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { JiraIssueWithDates } from '@/types/jira'
+import type { IssueRow } from '@/types/issue-table'
 
 interface OutputAnalysisProps {
-  closedIssues: JiraIssueWithDates[]
+  closedIssues: IssueRow[]
 }
 
-function IssueTable({ issues }: { issues: JiraIssueWithDates[] }) {
+function IssueTable({ issues }: { issues: IssueRow[] }) {
   if (issues.length === 0) {
     return <p className="text-muted-foreground text-sm py-4 text-center">Sin tickets</p>
   }

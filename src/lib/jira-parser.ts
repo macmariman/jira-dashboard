@@ -1,4 +1,5 @@
 import type { JiraIssue, JiraIssueWithDates, DateCount, LineChartData, StatusCount, SprintInfo } from '@/types/jira'
+import type { IssueRow } from '@/types/issue-table'
 
 export function parseJiraXml(xmlString: string): JiraIssue[] {
   const parser = new DOMParser()
@@ -79,7 +80,7 @@ export function parseJiraXmlWithDates(xmlString: string): JiraIssueWithDates[] {
 }
 
 export function groupByDate(
-  issues: JiraIssueWithDates[],
+  issues: IssueRow[],
   dateField: 'created' | 'resolved'
 ): DateCount[] {
   const dateMap = new Map<string, number>()
@@ -101,8 +102,8 @@ export function groupByDate(
 }
 
 export function prepareLineChartData(
-  createdIssues: JiraIssueWithDates[],
-  closedIssues: JiraIssueWithDates[]
+  createdIssues: IssueRow[],
+  closedIssues: IssueRow[]
 ): LineChartData[] {
   const createdByDate = groupByDate(createdIssues, 'created')
   const closedByDate = groupByDate(closedIssues, 'resolved')

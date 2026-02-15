@@ -3,12 +3,14 @@ import { DualFileDropZone } from '@/components/DualFileDropZone'
 import { TrendLineChart } from '@/components/TrendLineChart'
 import { OutputAnalysis } from '@/components/OutputAnalysis'
 import { Button } from '@/components/ui/button'
-import { parseJiraXmlWithDates, prepareLineChartData } from '@/lib/jira-parser'
-import type { JiraIssueWithDates, FileStatus } from '@/types/jira'
+import { prepareLineChartData } from '@/lib/jira-parser'
+import { jiraXmlAdapter } from '@/adapters/jira-xml-adapter'
+import type { IssueRow } from '@/types/issue-table'
+import type { FileStatus } from '@/types/jira'
 
 export function App() {
-  const [createdIssues, setCreatedIssues] = useState<JiraIssueWithDates[] | null>(null)
-  const [closedIssues, setClosedIssues] = useState<JiraIssueWithDates[] | null>(null)
+  const [createdIssues, setCreatedIssues] = useState<IssueRow[] | null>(null)
+  const [closedIssues, setClosedIssues] = useState<IssueRow[] | null>(null)
   const [createdFileStatus, setCreatedFileStatus] = useState<FileStatus>('empty')
   const [closedFileStatus, setClosedFileStatus] = useState<FileStatus>('empty')
   const [showLamona, setShowLamona] = useState(false)
@@ -17,7 +19,7 @@ export function App() {
   const handleCreatedFileLoaded = (content: string) => {
     setCreatedFileStatus('loading')
     try {
-      const parsed = parseJiraXmlWithDates(content)
+      const parsed = jiraXmlAdapter.parse(content)
       setCreatedIssues(parsed)
       setCreatedFileStatus('loaded')
     } catch {
@@ -28,7 +30,7 @@ export function App() {
   const handleClosedFileLoaded = (content: string) => {
     setClosedFileStatus('loading')
     try {
-      const parsed = parseJiraXmlWithDates(content)
+      const parsed = jiraXmlAdapter.parse(content)
       setClosedIssues(parsed)
       setClosedFileStatus('loaded')
     } catch {
