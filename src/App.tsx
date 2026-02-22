@@ -57,17 +57,6 @@ export function App() {
             <h1 className="text-xl font-semibold">JiraJira</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowLamona(true)
-                const audio = new Audio('/BUMBUM.mp3')
-                audioRef.current = audio
-                audio.play()
-              }}
-            >
-              Incrementar Productividad
-            </Button>
             {(createdIssues || closedIssues) && (
               <Button variant="outline" onClick={handleReset}>
                 Cargar otros archivos
