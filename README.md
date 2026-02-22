@@ -2,6 +2,8 @@
 
 A visual tool for analyzing Jira ticket trends. Upload two XML exports from Jira to compare ticket creation vs closure velocity over time.
 
+> Last updated: 2026-02-22
+
 ## Features
 
 - **Dual file upload** — Drop zones for `Creados.xml` (created tickets) and `Cerrados.xml` (closed tickets)
