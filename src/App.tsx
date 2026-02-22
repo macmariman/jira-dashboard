@@ -55,7 +55,7 @@ export function App() {
               onDoubleClick={() => window.open('https://www.youtube.com/watch?v=CdPrhRpQ5KA&list=RDCdPrhRpQ5KA&start_radio=1', '_blank')}
             />
             <h1 className="text-xl font-semibold">JiraJira</h1>
-            <span style={{ display: 'inline-block', animation: 'catJump 0.6s ease-in-out infinite' }}>🐱</span>
+            <span style={{ display: 'inline-block', animation: 'catJump 0.6s ease-in-out infinite' }}>🏖️</span>
           </div>
           <div className="flex items-center gap-2">
             {(createdIssues || closedIssues) && (
