@@ -91,10 +91,13 @@ export function App() {
             <img
               src="/logo.svg"
               alt="JiraJira"
-              className="h-8 w-8 cursor-pointer"
+              className="h-10 w-10 cursor-pointer"
               onDoubleClick={() => window.open('https://www.youtube.com/watch?v=CdPrhRpQ5KA&list=RDCdPrhRpQ5KA&start_radio=1', '_blank')}
             />
-            <h1 className="text-xl font-semibold">JiraJira</h1>
+            <div className="flex flex-col leading-tight">
+              <h1 className="text-xl font-semibold tracking-tight">Metricor</h1>
+              <span className="text-[11px] italic text-muted-foreground">El aroma de lo que importa</span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {sheetUrlRef.current && (createdIssues || closedIssues) && (
