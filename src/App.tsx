@@ -18,9 +18,7 @@ export function App() {
   const [createdFileStatus, setCreatedFileStatus] = useState<FileStatus>('empty')
   const [closedFileStatus, setClosedFileStatus] = useState<FileStatus>('empty')
   const [sheetStatus, setSheetStatus] = useState<FileStatus>('empty')
-  const [showLamona, setShowLamona] = useState(false)
   const [reloading, setReloading] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
   const sheetUrlRef = useRef<string | null>(null)
 
   const handleCreatedFileLoaded = (content: string) => {
@@ -99,17 +97,6 @@ export function App() {
             <h1 className="text-xl font-semibold">JiraJira</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowLamona(true)
-                const audio = new Audio('/BUMBUM.mp3')
-                audioRef.current = audio
-                audio.play()
-              }}
-            >
-              Incrementar Productividad
-            </Button>
             {sheetUrlRef.current && (createdIssues || closedIssues) && (
               <Button variant="outline" onClick={handleReload} disabled={reloading}>
                 {reloading ? 'Recargando...' : 'Recargar datos'}
@@ -156,34 +143,6 @@ export function App() {
         )}
       </main>
 
-      {showLamona && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 cursor-pointer animate-[fadeIn_0.3s_ease-out]"
-          onClick={() => {
-            setShowLamona(false)
-            if (audioRef.current) {
-              audioRef.current.pause()
-              audioRef.current = null
-            }
-          }}
-        >
-          <div className="relative animate-[lamonaIn_0.5s_ease-out]">
-            <img
-              src="/Lamona.png"
-              alt="Productividad incrementada"
-              className="max-h-[80vh] max-w-[80vw] rounded-xl shadow-2xl"
-            />
-            <div className="absolute inset-x-0 top-0 flex items-start justify-center pt-4 pointer-events-none">
-              <p
-                className="text-4xl md:text-6xl font-black text-white animate-[spinText_3s_linear_infinite] drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]"
-                style={{ textShadow: '0 0 10px #ff0, 0 0 30px #f0f, 0 0 50px #0ff' }}
-              >
-                A mover el Bum Bum equipo!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

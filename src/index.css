@@ -132,21 +132,8 @@
   to { opacity: 1; }
 }
 
-@keyframes lamonaIn {
-  0% { opacity: 0; transform: scale(0.3) rotate(-15deg); }
-  60% { transform: scale(1.1) rotate(3deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-
 @keyframes postItIn {
   from { opacity: 0; transform: scale(0.5) rotate(-3deg); }
   to { opacity: 1; transform: scale(1) rotate(-1deg); }
 }
 
-@keyframes spinText {
-  0% { transform: rotate(-10deg) scale(1); }
-  25% { transform: rotate(10deg) scale(1.1); }
-  50% { transform: rotate(-10deg) scale(1); }
-  75% { transform: rotate(10deg) scale(1.1); }
-  100% { transform: rotate(-10deg) scale(1); }
-}
