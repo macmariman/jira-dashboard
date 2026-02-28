@@ -16,20 +16,15 @@ function IssueTable({ issues }: { issues: IssueRow[] }) {
         <thead>
           <tr className="border-b text-left">
             <th className="py-2 pr-4 font-medium">Tipo</th>
-            <th className="py-2 pr-4 font-medium">Ticket</th>
-            <th className="py-2 pr-4 font-medium">Épica</th>
+            <th className="py-2 pr-4 font-medium">Summary</th>
             <th className="py-2 font-medium">Estado</th>
           </tr>
         </thead>
         <tbody>
-          {issues.map((issue) => (
-            <tr key={issue.key} className="border-b last:border-0">
+          {issues.map((issue, index) => (
+            <tr key={index} className="border-b last:border-0">
               <td className="py-2 pr-4">{issue.type}</td>
-              <td className="py-2 pr-4">
-                <span className="text-muted-foreground">{issue.key}</span>{' '}
-                {issue.summary}
-              </td>
-              <td className="py-2 pr-4 text-muted-foreground">{issue.parent ?? '—'}</td>
+              <td className="py-2 pr-4">{issue.summary}</td>
               <td className="py-2">{issue.status}</td>
             </tr>
           ))}
@@ -40,8 +35,8 @@ function IssueTable({ issues }: { issues: IssueRow[] }) {
 }
 
 export function OutputAnalysis({ closedIssues }: OutputAnalysisProps) {
-  const importantes = closedIssues.filter((i) => i.label === 'Inactiva')
-  const tareas = closedIssues.filter((i) => i.label === 'Tarea')
+  const importantes = closedIssues.filter((i) => i.important)
+  const tareas = closedIssues.filter((i) => !i.important)
 
   return (
     <Card>

@@ -1,4 +1,4 @@
-import type { JiraIssue, JiraIssueWithDates, DateCount, LineChartData, StatusCount, SprintInfo } from '@/types/jira'
+import type { JiraIssue, DateCount, LineChartData, StatusCount, SprintInfo } from '@/types/jira'
 import type { IssueRow } from '@/types/issue-table'
 
 export function parseJiraXml(xmlString: string): JiraIssue[] {
@@ -32,41 +32,30 @@ export function parseJiraXml(xmlString: string): JiraIssue[] {
   return issues
 }
 
-export function parseJiraXmlWithDates(xmlString: string): JiraIssueWithDates[] {
+export function parseJiraXmlWithDates(xmlString: string): IssueRow[] {
   const parser = new DOMParser()
   const doc = parser.parseFromString(xmlString, 'text/xml')
   const items = doc.querySelectorAll('item')
 
-  const issues: JiraIssueWithDates[] = []
+  const issues: IssueRow[] = []
 
   items.forEach((item) => {
-    const key = item.querySelector('key')?.textContent ?? ''
     const summary = item.querySelector('summary')?.textContent ?? ''
     const status = item.querySelector('status')?.textContent ?? ''
-    const statusCategoryEl = item.querySelector('statusCategory')
-    const statusCategory = (statusCategoryEl?.getAttribute('key') ?? 'new') as JiraIssue['statusCategory']
-    const assignee = item.querySelector('assignee')?.textContent ?? 'Sin asignar'
     const type = item.querySelector('type')?.textContent ?? ''
-    const priority = item.querySelector('priority')?.textContent ?? ''
-
     const createdStr = item.querySelector('created')?.textContent ?? ''
     const resolvedStr = item.querySelector('resolved')?.textContent ?? ''
-    const label = item.querySelector('labels > label')?.textContent ?? undefined
-    const parent = item.querySelector('parent')?.textContent ?? undefined
+    const label = item.querySelector('labels > label')?.textContent ?? ''
+    const sprintNodes = item.querySelectorAll('customfield[id="customfield_10020"] customfieldvalue')
+    const sprints = Array.from(sprintNodes).map((node) => node.textContent ?? '').filter(Boolean)
 
-    const createdDate = new Date(createdStr)
-
-    const issue: JiraIssueWithDates = {
-      key,
+    const issue: IssueRow = {
+      createdDate: new Date(createdStr),
+      important: label === 'Inactiva',
       summary,
-      status,
-      statusCategory,
-      assignee,
       type,
-      priority,
-      createdDate,
-      label,
-      parent,
+      status,
+      sprints,
     }
 
     if (resolvedStr) {

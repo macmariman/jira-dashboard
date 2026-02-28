@@ -1,10 +1,14 @@
 import { useRef, useState } from 'react'
 import { DualFileDropZone } from '@/components/DualFileDropZone'
+import { SheetUrlInput } from '@/components/SheetUrlInput'
 import { TrendLineChart } from '@/components/TrendLineChart'
+import { CarryOverChart } from '@/components/CarryOverChart'
+import { AnnotatableChart } from '@/components/AnnotatableChart'
 import { OutputAnalysis } from '@/components/OutputAnalysis'
 import { Button } from '@/components/ui/button'
 import { prepareLineChartData } from '@/lib/jira-parser'
 import { jiraXmlAdapter } from '@/adapters/jira-xml-adapter'
+import { csvAdapter } from '@/adapters/csv-adapter'
 import type { IssueRow } from '@/types/issue-table'
 import type { FileStatus } from '@/types/jira'
 
@@ -13,8 +17,11 @@ export function App() {
   const [closedIssues, setClosedIssues] = useState<IssueRow[] | null>(null)
   const [createdFileStatus, setCreatedFileStatus] = useState<FileStatus>('empty')
   const [closedFileStatus, setClosedFileStatus] = useState<FileStatus>('empty')
+  const [sheetStatus, setSheetStatus] = useState<FileStatus>('empty')
   const [showLamona, setShowLamona] = useState(false)
+  const [reloading, setReloading] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const sheetUrlRef = useRef<string | null>(null)
 
   const handleCreatedFileLoaded = (content: string) => {
     setCreatedFileStatus('loading')
@@ -38,11 +45,44 @@ export function App() {
     }
   }
 
+  const handleSheetUrl = async (url: string) => {
+    setSheetStatus('loading')
+    try {
+      const response = await fetch(url)
+      const text = await response.text()
+      const allIssues = csvAdapter.parse(text)
+      setCreatedIssues(allIssues)
+      setClosedIssues(allIssues.filter((i) => i.resolvedDate))
+      sheetUrlRef.current = url
+      setSheetStatus('loaded')
+    } catch {
+      setSheetStatus('error')
+    }
+  }
+
+  const handleReload = async () => {
+    if (!sheetUrlRef.current) return
+    setReloading(true)
+    try {
+      const response = await fetch(sheetUrlRef.current)
+      const text = await response.text()
+      const allIssues = csvAdapter.parse(text)
+      setCreatedIssues(allIssues)
+      setClosedIssues(allIssues.filter((i) => i.resolvedDate))
+    } catch {
+      setSheetStatus('error')
+    } finally {
+      setReloading(false)
+    }
+  }
+
   const handleReset = () => {
     setCreatedIssues(null)
     setClosedIssues(null)
     setCreatedFileStatus('empty')
     setClosedFileStatus('empty')
+    setSheetStatus('empty')
+    sheetUrlRef.current = null
   }
 
   return (
@@ -70,6 +110,11 @@ export function App() {
             >
               Incrementar Productividad
             </Button>
+            {sheetUrlRef.current && (createdIssues || closedIssues) && (
+              <Button variant="outline" onClick={handleReload} disabled={reloading}>
+                {reloading ? 'Recargando...' : 'Recargar datos'}
+              </Button>
+            )}
             {(createdIssues || closedIssues) && (
               <Button variant="outline" onClick={handleReset}>
                 Cargar otros archivos
@@ -81,7 +126,16 @@ export function App() {
 
       <main className="container mx-auto px-4 py-8">
         {!createdIssues || !closedIssues ? (
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-4xl space-y-6">
+            <SheetUrlInput onSubmit={handleSheetUrl} status={sheetStatus} />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">o</span>
+              </div>
+            </div>
             <DualFileDropZone
               onCreatedFileLoaded={handleCreatedFileLoaded}
               onClosedFileLoaded={handleClosedFileLoaded}
@@ -91,7 +145,12 @@ export function App() {
           </div>
         ) : (
           <div className="space-y-6">
-            <TrendLineChart data={prepareLineChartData(createdIssues, closedIssues)} />
+            <AnnotatableChart chartId="trend">
+              <TrendLineChart data={prepareLineChartData(createdIssues, closedIssues)} />
+            </AnnotatableChart>
+            <AnnotatableChart chartId="carryover">
+              <CarryOverChart issues={createdIssues} />
+            </AnnotatableChart>
             <OutputAnalysis closedIssues={closedIssues} />
           </div>
         )}
